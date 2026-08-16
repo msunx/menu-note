@@ -25,7 +25,7 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 
 当前 Release 提供 Apple Silicon（`arm64`）版本，要求 macOS 14 或更高版本。
 
-1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.9.0-macos-arm64.zip`。
+1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.10.0-macos-arm64.zip`。
 2. 解压后将 `Menu Note.app` 移动到“应用程序”目录。
 3. 首次启动时右键应用并选择“打开”。当前版本使用临时签名，尚未经过 Apple 公证。
 4. 点击菜单栏中的便笺图标开始记录。
@@ -34,11 +34,19 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 
 - 粗体、斜体、删除线、行内代码、链接和引用
 - 无序列表、编号列表和内嵌待办复选框
-- 默认、蓝、绿、橙、紫五档文字颜色
+- 默认色与 Pink、Mauve、Red、Peach、Green、Blue、Maroon 七种 Catppuccin 自适应文字颜色（浅色 Latte、深色 Frappé）
+- 弹窗内一键启动或停止 `caffeinate`，在 Menu Note 运行期间阻止 Mac 空闲睡眠
 - 浅色玻璃主题与 Catppuccin Mocha 风格深色主题
 - 自动保存、旧版内容块与 Markdown 内容迁移
 - 键盘访问、拼写检查与减少动态效果支持
 - 自定义应用图标和菜单栏模板图标
+
+### v0.10.0 更新
+
+- 文字颜色扩展为 Pink、Mauve、Red、Peach、Green、Blue、Maroon 七种，并根据主题使用浅色 Latte、深色 Frappé 配色。
+- Todo 默认使用 Peach；完成态保留颜色并适度降低透明度，兼顾状态区分与可读性。
+- 主题按钮旁新增保持唤醒按钮，可在应用运行期间启动或停止 macOS 自带的 `caffeinate`。
+- 保留旧版橙色和紫色富文本内容的兼容显示。
 
 ## 快捷键
 
@@ -78,6 +86,7 @@ ARCH=arm64 ./scripts/build-app.sh
 - 富文本内容存储在偏好设置域 `com.muyang.menunote` 中。
 - 主题选择和编辑内容仅保留在本机。
 - 应用不收集分析数据，不包含遥测、广告或网络请求。
+- 保持唤醒功能仅启动系统自带的 `/usr/bin/caffeinate`，不会联网；合盖行为仍受 Mac 机型、电源和外接显示器状态影响。
 - 卸载应用不会主动删除偏好数据。
 
 ## 项目结构

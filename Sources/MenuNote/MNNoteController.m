@@ -34,6 +34,7 @@ static NSString *MNInlineRichHTML(NSString *value) {
 @property(nonatomic, strong) WKWebView *webView;
 @property(nonatomic, copy, readwrite) NSString *currentTheme;
 @property(nonatomic) BOOL previewContent;
+@property(nonatomic) BOOL awakeState;
 @end
 
 @implementation MNNoteController
@@ -60,12 +61,16 @@ static NSString *MNInlineRichHTML(NSString *value) {
     WKUserContentController *contentController = [WKUserContentController new];
     [contentController addScriptMessageHandler:self name:@"menuNoteSave"];
     [contentController addScriptMessageHandler:self name:@"menuNoteTheme"];
+    [contentController addScriptMessageHandler:self name:@"menuNoteAwake"];
     [contentController addScriptMessageHandler:self name:@"menuNoteQuit"];
 
     NSDictionary *initialState = @{ @"html": [self initialRichTextHTML] };
     NSString *stateJSON = [self JSONStringForObject:initialState fallback:@"{\"html\":\"\"}"];
     NSString *themeJSON = [self JSONStringForObject:self.currentTheme fallback:@"\"light\""];
-    NSString *bootstrap = [NSString stringWithFormat:@"window.__MENU_NOTE_INITIAL__ = %@; window.__MENU_NOTE_THEME__ = %@;", stateJSON, themeJSON];
+    NSString *bootstrap = [NSString stringWithFormat:@"window.__MENU_NOTE_INITIAL__ = %@; window.__MENU_NOTE_THEME__ = %@; window.__MENU_NOTE_AWAKE__ = %@;",
+        stateJSON,
+        themeJSON,
+        self.awakeState ? @"true" : @"false"];
     WKUserScript *userScript = [[WKUserScript alloc] initWithSource:bootstrap injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
     [contentController addUserScript:userScript];
     configuration.userContentController = contentController;
@@ -103,13 +108,13 @@ static NSString *MNInlineRichHTML(NSString *value) {
 
 - (NSString *)initialRichTextHTML {
     if (self.previewContent) {
-        return @"<div><strong class=\"text-color-blue\">今天</strong> · <span class=\"text-color-purple\">把重要的事写下来</span></div><div><br></div>"
+        return @"<div><strong class=\"text-color-blue\">今天</strong> · <span class=\"text-color-mauve\">把重要的事写下来</span></div><div><br></div>"
             "<div class=\"todo-row\" data-checked=\"true\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button><span class=\"todo-text\">完成菜单栏编辑器</span></div>"
             "<div class=\"todo-row\" data-checked=\"true\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button><span class=\"todo-text\">打磨交互细节</span></div>"
             "<div class=\"todo-row\" data-checked=\"false\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button>"
             "<span class=\"todo-text text-color-green\">录制演示</span></div>"
             "<div class=\"todo-row\" data-checked=\"false\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button>"
-            "<span class=\"todo-text text-color-orange\">发布 ✨</span></div>";
+            "<span class=\"todo-text text-color-peach\">发布 ✨</span></div>";
     }
 
     NSString *savedRichText = [NSUserDefaults.standardUserDefaults stringForKey:MNRichTextDefaultsKey];
@@ -219,7 +224,18 @@ static NSString *MNInlineRichHTML(NSString *value) {
         if (self.themeHandler) self.themeHandler(theme);
         return;
     }
+    if ([message.name isEqualToString:@"menuNoteAwake"] && [message.body respondsToSelector:@selector(boolValue)]) {
+        if (self.awakeHandler) self.awakeHandler([message.body boolValue]);
+        return;
+    }
     if ([message.name isEqualToString:@"menuNoteQuit"] && self.quitHandler) self.quitHandler();
+}
+
+- (void)setAwakeEnabled:(BOOL)enabled {
+    self.awakeState = enabled;
+    if (!self.webView) return;
+    NSString *script = [NSString stringWithFormat:@"window.__MENU_NOTE_SET_AWAKE__ && window.__MENU_NOTE_SET_AWAKE__(%@);", enabled ? @"true" : @"false"];
+    [self.webView evaluateJavaScript:script completionHandler:nil];
 }
 
 - (void)saveMessageBody:(id)body {

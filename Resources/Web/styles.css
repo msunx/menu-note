@@ -14,14 +14,19 @@
     --accent-ink: #1e1e2e;
     --danger: #f38ba8;
     --code: #313244;
-    --code-text: #fab387;
-    --link: #89b4fa;
-    --quote: #cba6f7;
-    --color-blue: #89b4fa;
-    --color-green: #a6e3a1;
-    --color-orange: #fab387;
-    --color-purple: #cba6f7;
-    --todo-text: #b4befe;
+    --code-text: #ef9f76;
+    --link: #8caaee;
+    --quote: #ca9ee6;
+    --color-pink: #f4b8e4;
+    --color-mauve: #ca9ee6;
+    --color-red: #e78284;
+    --color-peach: #ef9f76;
+    --color-green: #a6d189;
+    --color-blue: #8caaee;
+    --color-maroon: #ea999c;
+    --color-orange: var(--color-peach);
+    --color-purple: var(--color-mauve);
+    --todo-text: var(--color-peach);
     --todo-done: #7f849c;
     --glass-surface: rgba(30, 30, 46, .66);
     --glass-reading: rgba(24, 24, 37, .4);
@@ -51,14 +56,19 @@
     --accent-ink: #173a1d;
     --danger: #c94a51;
     --code: #eef1f5;
-    --code-text: #a75f24;
-    --link: #2e70c9;
-    --quote: #7955b7;
-    --color-blue: #2e70c9;
-    --color-green: #278552;
-    --color-orange: #b56725;
-    --color-purple: #7955b7;
-    --todo-text: #51658f;
+    --code-text: #fe640b;
+    --link: #1e66f5;
+    --quote: #8839ef;
+    --color-pink: #ea76cb;
+    --color-mauve: #8839ef;
+    --color-red: #d20f39;
+    --color-peach: #fe640b;
+    --color-green: #40a02b;
+    --color-blue: #1e66f5;
+    --color-maroon: #e64553;
+    --color-orange: var(--color-peach);
+    --color-purple: var(--color-mauve);
+    --todo-text: var(--color-peach);
     --todo-done: #8d96a4;
     --glass-surface: rgba(230, 246, 255, .24);
     --glass-reading: rgba(255, 255, 255, .3);
@@ -232,6 +242,15 @@ button {
     color: var(--danger);
 }
 
+.awake-button[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--color-peach) 14%, transparent);
+    color: var(--color-peach);
+}
+
+.awake-button[aria-pressed="true"] .awake-steam {
+    animation: awake-steam 1.8s ease-in-out infinite;
+}
+
 .meta-button svg {
     width: 15px;
     height: 15px;
@@ -349,6 +368,24 @@ button {
     color: var(--text);
 }
 
+.text-color-pink {
+    color: var(--color-pink);
+}
+
+.text-color-mauve,
+.text-color-purple {
+    color: var(--color-mauve);
+}
+
+.text-color-red {
+    color: var(--color-red);
+}
+
+.text-color-peach,
+.text-color-orange {
+    color: var(--color-peach);
+}
+
 .text-color-blue {
     color: var(--color-blue);
 }
@@ -357,12 +394,8 @@ button {
     color: var(--color-green);
 }
 
-.text-color-orange {
-    color: var(--color-orange);
-}
-
-.text-color-purple {
-    color: var(--color-purple);
+.text-color-maroon {
+    color: var(--color-maroon);
 }
 
 .todo-row {
@@ -418,13 +451,14 @@ button {
 }
 
 .todo-row[data-checked="true"] .todo-text {
+    opacity: .68;
     text-decoration: line-through;
     text-decoration-color: var(--quiet);
     text-decoration-thickness: 1.2px;
 }
 
 .todo-row[data-checked="true"] .todo-text:not([class*="text-color-"]) {
-    color: var(--todo-done);
+    color: var(--todo-text);
 }
 
 .toolbar {
@@ -515,7 +549,8 @@ button {
     left: 0;
     height: 2px;
     border-radius: 2px;
-    background: linear-gradient(90deg, var(--color-blue), var(--color-green), var(--color-orange), var(--color-purple));
+    background: linear-gradient(90deg, var(--color-pink), var(--color-mauve), var(--color-red), var(--color-peach), var(--color-green), var(--color-blue),
+        var(--color-maroon));
 }
 
 .toolbar svg {
@@ -554,7 +589,7 @@ button {
     position: absolute;
     z-index: 8;
     bottom: 49px;
-    left: 96px;
+    left: 50%;
     display: flex;
     padding: 6px;
     gap: 3px;
@@ -562,6 +597,7 @@ button {
     border-radius: 10px;
     background: var(--surface-raised);
     box-shadow: 0 10px 26px var(--shadow);
+    transform: translateX(-50%);
 }
 
 .color-popover[hidden] {
@@ -597,6 +633,24 @@ button {
     background: var(--text);
 }
 
+.color-pink {
+    background: var(--color-pink);
+}
+
+.color-mauve,
+.color-purple {
+    background: var(--color-mauve);
+}
+
+.color-red {
+    background: var(--color-red);
+}
+
+.color-peach,
+.color-orange {
+    background: var(--color-peach);
+}
+
 .color-blue {
     background: var(--color-blue);
 }
@@ -605,12 +659,8 @@ button {
     background: var(--color-green);
 }
 
-.color-orange {
-    background: var(--color-orange);
-}
-
-.color-purple {
-    background: var(--color-purple);
+.color-maroon {
+    background: var(--color-maroon);
 }
 
 .link-popover[hidden] {
@@ -656,6 +706,11 @@ input:focus-visible {
     50% { opacity: 1; transform: scale(1); }
 }
 
+@keyframes awake-steam {
+    0%, 100% { opacity: .42; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-.7px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
     #save-status,
     .window-actions {
@@ -663,6 +718,10 @@ input:focus-visible {
     }
 
     #save-status.saving i {
+        animation: none;
+    }
+
+    .awake-button[aria-pressed="true"] .awake-steam {
         animation: none;
     }
 }

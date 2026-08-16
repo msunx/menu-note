@@ -4,6 +4,7 @@
     const editor = document.querySelector('#editor');
     const saveStatus = document.querySelector('#save-status');
     const themeButton = document.querySelector('#theme-button');
+    const awakeButton = document.querySelector('#awake-button');
     const linkPopover = document.querySelector('#link-popover');
     const linkInput = document.querySelector('#link-input');
     const linkConfirm = document.querySelector('#link-confirm');
@@ -16,16 +17,21 @@
 
     const colorMarkers = {
         default: 'rgb(1, 2, 3)',
-        blue: 'rgb(54, 117, 230)',
-        green: 'rgb(44, 139, 84)',
-        orange: 'rgb(191, 104, 36)',
-        purple: 'rgb(126, 88, 190)'
+        pink: 'rgb(234, 118, 203)',
+        mauve: 'rgb(136, 57, 239)',
+        red: 'rgb(210, 15, 57)',
+        peach: 'rgb(254, 100, 11)',
+        green: 'rgb(64, 160, 43)',
+        blue: 'rgb(30, 102, 245)',
+        maroon: 'rgb(230, 69, 83)'
     };
+    const legacyColorNames = { orange: 'peach', purple: 'mauve' };
 
     editor.innerHTML = typeof initial.html === 'string' ? initial.html : '';
     normalizeColorSpans();
     prepareTodoRows();
     setTheme(window.__MENU_NOTE_THEME__ === 'light' ? 'light' : 'dark', false);
+    setAwakeEnabled(window.__MENU_NOTE_AWAKE__ === true);
     document.execCommand('styleWithCSS', false, false);
     requestAnimationFrame(() => focusEditorStart());
 
@@ -46,6 +52,11 @@
     document.addEventListener('selectionchange', updateToolbarState);
 
     themeButton.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark', true));
+    awakeButton.addEventListener('click', () => {
+        const enabled = awakeButton.getAttribute('aria-pressed') !== 'true';
+        setAwakeEnabled(enabled);
+        bridge?.menuNoteAwake?.postMessage(enabled);
+    });
     document.querySelector('#quit-button').addEventListener('click', () => {
         flushSave();
         bridge?.menuNoteQuit?.postMessage(true);
@@ -344,7 +355,8 @@
     function activeTextColor(node) {
         const colorElement = closestFromNode(node, '[class*="text-color-"]');
         const colorClass = Array.from(colorElement?.classList || []).find((name) => name.startsWith('text-color-'));
-        return colorClass ? colorClass.replace('text-color-', '') : 'default';
+        const colorName = colorClass ? colorClass.replace('text-color-', '') : 'default';
+        return legacyColorNames[colorName] || colorName;
     }
 
     function updateColorButtons(activeColor) {
@@ -396,6 +408,15 @@
         themeButton.setAttribute('aria-label', theme === 'dark' ? '切换为浅色模式' : '切换为深色模式');
         if (notifyHost) bridge?.menuNoteTheme?.postMessage(theme);
     }
+
+    function setAwakeEnabled(enabled) {
+        const isEnabled = Boolean(enabled);
+        awakeButton.setAttribute('aria-pressed', String(isEnabled));
+        awakeButton.setAttribute('aria-label', isEnabled ? '停止保持 Mac 唤醒' : '保持 Mac 唤醒');
+        awakeButton.title = isEnabled ? '停止保持 Mac 唤醒' : '保持 Mac 唤醒（caffeinate）';
+    }
+
+    window.__MENU_NOTE_SET_AWAKE__ = setAwakeEnabled;
 
     function todoTextAtSelection() {
         const selection = window.getSelection();

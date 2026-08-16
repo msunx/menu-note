@@ -57,6 +57,7 @@ static NSImage *MNMenuBarIcon(void) {
 @property(nonatomic, strong) NSPopover *popover;
 @property(nonatomic, strong) MNNoteController *noteController;
 @property(nonatomic, strong, nullable) NSWindow *previewWindow;
+@property(nonatomic, strong, nullable) NSTask *caffeinateTask;
 @property(nonatomic) BOOL previewMode;
 @end
 
@@ -71,6 +72,7 @@ static NSImage *MNMenuBarIcon(void) {
     __weak typeof(self) weakSelf = self;
     self.noteController.quitHandler = ^{ [NSApp terminate:nil]; };
     self.noteController.themeHandler = ^(NSString *theme) { [weakSelf applyTheme:theme]; };
+    self.noteController.awakeHandler = ^(BOOL enabled) { [weakSelf setAwakeEnabled:enabled]; };
     [self applyTheme:self.noteController.currentTheme];
 
     if (self.previewMode) {
@@ -169,6 +171,51 @@ static NSImage *MNMenuBarIcon(void) {
 - (void)applyTheme:(NSString *)theme {
     NSAppearanceName name = [theme isEqualToString:@"dark"] ? NSAppearanceNameDarkAqua : NSAppearanceNameAqua;
     NSApp.appearance = [NSAppearance appearanceNamed:name];
+}
+
+- (void)setAwakeEnabled:(BOOL)enabled {
+    if (enabled) {
+        if (self.caffeinateTask.isRunning) {
+            [self.noteController setAwakeEnabled:YES];
+            return;
+        }
+
+        NSTask *task = [NSTask new];
+        task.executableURL = [NSURL fileURLWithPath:@"/usr/bin/caffeinate"];
+        NSString *processID = [NSString stringWithFormat:@"%d", NSProcessInfo.processInfo.processIdentifier];
+        task.arguments = @[@"-i", @"-w", processID];
+        __weak typeof(self) weakSelf = self;
+        task.terminationHandler = ^(NSTask *finishedTask) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                typeof(self) strongSelf = weakSelf;
+                if (!strongSelf || strongSelf.caffeinateTask != finishedTask) return;
+                strongSelf.caffeinateTask = nil;
+                [strongSelf.noteController setAwakeEnabled:NO];
+            });
+        };
+
+        NSError *error = nil;
+        if (![task launchAndReturnError:&error]) {
+            NSLog(@"无法启动 caffeinate：%@", error.localizedDescription);
+            [self.noteController setAwakeEnabled:NO];
+            return;
+        }
+        self.caffeinateTask = task;
+        [self.noteController setAwakeEnabled:YES];
+        return;
+    }
+
+    NSTask *task = self.caffeinateTask;
+    self.caffeinateTask = nil;
+    if (task.isRunning) [task terminate];
+    [self.noteController setAwakeEnabled:NO];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)notification {
+    (void)notification;
+    NSTask *task = self.caffeinateTask;
+    self.caffeinateTask = nil;
+    if (task.isRunning) [task terminate];
 }
 
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
