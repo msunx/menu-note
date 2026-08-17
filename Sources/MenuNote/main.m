@@ -4,10 +4,10 @@
 static CGFloat const MNPopoverWidth = 350.0;
 static CGFloat const MNPopoverHeight = 440.0;
 
-static NSImage *MNMenuBarIcon(void) {
+static NSImage *MNMenuBarIcon(NSColor *strokeColor, BOOL template) {
     NSImage *image = [NSImage imageWithSize:NSMakeSize(18, 18) flipped:NO drawingHandler:^BOOL(NSRect destinationRect) {
         (void)destinationRect;
-        [NSColor.blackColor setStroke];
+        [strokeColor setStroke];
 
         NSBezierPath *leftCard = [NSBezierPath bezierPath];
         [leftCard moveToPoint:NSMakePoint(4.7, 10.7)];
@@ -48,7 +48,7 @@ static NSImage *MNMenuBarIcon(void) {
         [writing stroke];
         return YES;
     }];
-    image.template = YES;
+    image.template = template;
     return image;
 }
 
@@ -122,9 +122,7 @@ static NSImage *MNMenuBarIcon(void) {
     NSStatusBarButton *button = self.statusItem.button;
     button.target = self;
     button.action = @selector(togglePopover:);
-    button.toolTip = @"Menu Note · 临时记事";
-    button.accessibilityLabel = @"打开 Menu Note";
-    button.image = MNMenuBarIcon();
+    [self updateMenuBarAwakeState:NO];
 }
 
 - (void)configurePopover {
@@ -173,10 +171,23 @@ static NSImage *MNMenuBarIcon(void) {
     NSApp.appearance = [NSAppearance appearanceNamed:name];
 }
 
+- (void)updateMenuBarAwakeState:(BOOL)enabled {
+    NSStatusBarButton *button = self.statusItem.button;
+    button.contentTintColor = nil;
+    button.image = enabled ? MNMenuBarIcon(NSColor.systemOrangeColor, NO) : MNMenuBarIcon(NSColor.blackColor, YES);
+    button.toolTip = enabled ? @"Menu Note · 正在保持 Mac 唤醒" : @"Menu Note · 临时记事";
+    button.accessibilityLabel = enabled ? @"打开 Menu Note，正在保持 Mac 唤醒" : @"打开 Menu Note";
+}
+
+- (void)updateAwakeState:(BOOL)enabled {
+    [self.noteController setAwakeEnabled:enabled];
+    [self updateMenuBarAwakeState:enabled];
+}
+
 - (void)setAwakeEnabled:(BOOL)enabled {
     if (enabled) {
         if (self.caffeinateTask.isRunning) {
-            [self.noteController setAwakeEnabled:YES];
+            [self updateAwakeState:YES];
             return;
         }
 
@@ -190,25 +201,25 @@ static NSImage *MNMenuBarIcon(void) {
                 typeof(self) strongSelf = weakSelf;
                 if (!strongSelf || strongSelf.caffeinateTask != finishedTask) return;
                 strongSelf.caffeinateTask = nil;
-                [strongSelf.noteController setAwakeEnabled:NO];
+                [strongSelf updateAwakeState:NO];
             });
         };
 
         NSError *error = nil;
         if (![task launchAndReturnError:&error]) {
             NSLog(@"无法启动 caffeinate：%@", error.localizedDescription);
-            [self.noteController setAwakeEnabled:NO];
+            [self updateAwakeState:NO];
             return;
         }
         self.caffeinateTask = task;
-        [self.noteController setAwakeEnabled:YES];
+        [self updateAwakeState:YES];
         return;
     }
 
     NSTask *task = self.caffeinateTask;
     self.caffeinateTask = nil;
     if (task.isRunning) [task terminate];
-    [self.noteController setAwakeEnabled:NO];
+    [self updateAwakeState:NO];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)notification {

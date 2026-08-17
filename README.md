@@ -25,7 +25,7 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 
 当前 Release 提供 Apple Silicon（`arm64`）版本，要求 macOS 14 或更高版本。
 
-1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.10.0-macos-arm64.zip`。
+1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.10.2-macos-arm64.zip`。
 2. 解压后将 `Menu Note.app` 移动到“应用程序”目录。
 3. 首次启动时右键应用并选择“打开”。当前版本使用临时签名，尚未经过 Apple 公证。
 4. 点击菜单栏中的便笺图标开始记录。
@@ -40,6 +40,11 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 - 自动保存、旧版内容块与 Markdown 内容迁移
 - 键盘访问、拼写检查与减少动态效果支持
 - 自定义应用图标和菜单栏模板图标
+
+### v0.10.2 更新
+
+- 开启保持唤醒后，菜单栏会切换为橙色非模板图标；停止保持唤醒或 `caffeinate` 异常退出时自动恢复系统自适应图标。
+- 菜单栏图标的悬浮提示和辅助功能文案会同步显示保持唤醒状态。
 
 ### v0.10.0 更新
 
