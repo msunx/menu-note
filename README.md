@@ -25,10 +25,11 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 
 当前 Release 提供 Apple Silicon（`arm64`）版本，要求 macOS 14 或更高版本。
 
-1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.10.2-macos-arm64.zip`。
+1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.11.0-macos-arm64.zip`。
 2. 解压后将 `Menu Note.app` 移动到“应用程序”目录。
 3. 首次启动时右键应用并选择“打开”。当前版本使用临时签名，尚未经过 Apple 公证。
 4. 点击菜单栏中的便笺图标开始记录。
+5. 如需使用 Finder 右键菜单，点击弹窗右上角的文件夹按钮，在系统扩展管理界面中启用“Menu Note Finder 菜单”。
 
 ## 功能
 
@@ -36,10 +37,28 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 - 无序列表、编号列表和内嵌待办复选框
 - 默认色与 Pink、Mauve、Red、Peach、Green、Blue、Maroon 七种 Catppuccin 自适应文字颜色（浅色 Latte、深色 Frappé）
 - 弹窗内一键启动或停止 `caffeinate`，在 Menu Note 运行期间阻止 Mac 空闲睡眠
+- Finder 右键菜单支持彻底删除、复制绝对路径，以及 Windows 风格的剪切后移动
 - 浅色玻璃主题与 Catppuccin Mocha 风格深色主题
 - 自动保存、旧版内容块与 Markdown 内容迁移
 - 键盘访问、拼写检查与减少动态效果支持
 - 自定义应用图标和菜单栏模板图标
+
+### Finder 右键菜单
+
+- **彻底删除**：直接删除所选文件或文件夹，不会移入废纸篓，也不会再次弹出确认框；文件系统根目录和当前用户主目录不会被删除。
+- **复制目录**：右键文件或文件夹时复制所选项目的绝对路径；在 Finder 空白处右键时复制当前文件夹的绝对路径。多选时每行复制一个路径。
+- **剪切**：右键项目并选择“剪切”，进入目标文件夹后在空白处右键选择“粘贴并移动”；再次复制其他内容会取消本次剪切状态。
+- 菜单使用 macOS 原生 SF Symbols，为剪切、复制目录、彻底删除和粘贴并移动提供对应图标，并自动适配系统外观。
+
+> “彻底删除”不可撤销。使用前请确认所选项目无需保留。
+
+### v0.11.0 更新
+
+- 新增 Finder Sync 扩展，为文件、文件夹和 Finder 空白区域提供原生右键菜单。
+- 新增彻底删除与绝对路径复制；彻底删除会保护文件系统根目录和当前用户主目录。
+- 新增剪切与“粘贴并移动”闭环；剪切状态使用路径数据保存到系统剪贴板，兼容 Finder 扩展沙箱，并对同名冲突、源目标相同和移动到自身子目录等情况进行校验。
+- 为 Finder 菜单加入剪刀、文稿复制、废纸篓和剪贴板等原生图标，移除菜单项之间的多余空白分隔。
+- 弹窗右上角新增 Finder 扩展管理入口，并显示扩展当前启用状态。
 
 ### v0.10.2 更新
 
@@ -92,6 +111,8 @@ ARCH=arm64 ./scripts/build-app.sh
 - 主题选择和编辑内容仅保留在本机。
 - 应用不收集分析数据，不包含遥测、广告或网络请求。
 - 保持唤醒功能仅启动系统自带的 `/usr/bin/caffeinate`，不会联网；合盖行为仍受 Mac 机型、电源和外接显示器状态影响。
+- Finder 右键菜单只处理用户当前选择的本地文件路径；剪切状态保存在系统剪贴板中，复制其他内容后自动失效。
+- Finder 扩展单独进行沙箱签名，不在后台扫描或修改文件；文件写入只会在用户主动选择彻底删除或粘贴并移动后发生。
 - 卸载应用不会主动删除偏好数据。
 
 ## 项目结构
@@ -99,6 +120,7 @@ ARCH=arm64 ./scripts/build-app.sh
 ```text
 Resources/Web/          富文本编辑器界面与交互
 Sources/MenuNote/       AppKit 菜单栏、弹窗和本地存储
+Sources/MenuNoteFinder/ Finder 右键菜单扩展
 scripts/build-app.sh    应用构建与临时签名
 scripts/generate_icon.m 原生应用图标生成器
 ```

@@ -247,6 +247,11 @@ button {
     color: var(--color-peach);
 }
 
+.finder-button[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+}
+
 .awake-button[aria-pressed="true"] .awake-steam {
     animation: awake-steam 1.8s ease-in-out infinite;
 }
