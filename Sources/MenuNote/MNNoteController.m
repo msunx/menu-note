@@ -35,6 +35,7 @@ static NSString *MNInlineRichHTML(NSString *value) {
 @property(nonatomic, copy, readwrite) NSString *currentTheme;
 @property(nonatomic) BOOL previewContent;
 @property(nonatomic) BOOL awakeState;
+@property(nonatomic) BOOL finderExtensionState;
 @end
 
 @implementation MNNoteController
@@ -62,15 +63,17 @@ static NSString *MNInlineRichHTML(NSString *value) {
     [contentController addScriptMessageHandler:self name:@"menuNoteSave"];
     [contentController addScriptMessageHandler:self name:@"menuNoteTheme"];
     [contentController addScriptMessageHandler:self name:@"menuNoteAwake"];
+    [contentController addScriptMessageHandler:self name:@"menuNoteFinder"];
     [contentController addScriptMessageHandler:self name:@"menuNoteQuit"];
 
     NSDictionary *initialState = @{ @"html": [self initialRichTextHTML] };
     NSString *stateJSON = [self JSONStringForObject:initialState fallback:@"{\"html\":\"\"}"];
     NSString *themeJSON = [self JSONStringForObject:self.currentTheme fallback:@"\"light\""];
-    NSString *bootstrap = [NSString stringWithFormat:@"window.__MENU_NOTE_INITIAL__ = %@; window.__MENU_NOTE_THEME__ = %@; window.__MENU_NOTE_AWAKE__ = %@;",
+    NSString *bootstrap = [NSString stringWithFormat:@"window.__MENU_NOTE_INITIAL__ = %@; window.__MENU_NOTE_THEME__ = %@; window.__MENU_NOTE_AWAKE__ = %@; window.__MENU_NOTE_FINDER_ENABLED__ = %@;",
         stateJSON,
         themeJSON,
-        self.awakeState ? @"true" : @"false"];
+        self.awakeState ? @"true" : @"false",
+        self.finderExtensionState ? @"true" : @"false"];
     WKUserScript *userScript = [[WKUserScript alloc] initWithSource:bootstrap injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:YES];
     [contentController addUserScript:userScript];
     configuration.userContentController = contentController;
@@ -228,6 +231,10 @@ static NSString *MNInlineRichHTML(NSString *value) {
         if (self.awakeHandler) self.awakeHandler([message.body boolValue]);
         return;
     }
+    if ([message.name isEqualToString:@"menuNoteFinder"] && self.finderExtensionHandler) {
+        self.finderExtensionHandler();
+        return;
+    }
     if ([message.name isEqualToString:@"menuNoteQuit"] && self.quitHandler) self.quitHandler();
 }
 
@@ -235,6 +242,13 @@ static NSString *MNInlineRichHTML(NSString *value) {
     self.awakeState = enabled;
     if (!self.webView) return;
     NSString *script = [NSString stringWithFormat:@"window.__MENU_NOTE_SET_AWAKE__ && window.__MENU_NOTE_SET_AWAKE__(%@);", enabled ? @"true" : @"false"];
+    [self.webView evaluateJavaScript:script completionHandler:nil];
+}
+
+- (void)setFinderExtensionEnabled:(BOOL)enabled {
+    self.finderExtensionState = enabled;
+    if (!self.webView) return;
+    NSString *script = [NSString stringWithFormat:@"window.__MENU_NOTE_SET_FINDER_ENABLED__ && window.__MENU_NOTE_SET_FINDER_ENABLED__(%@);", enabled ? @"true" : @"false"];
     [self.webView evaluateJavaScript:script completionHandler:nil];
 }
 

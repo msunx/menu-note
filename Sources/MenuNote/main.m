@@ -1,4 +1,5 @@
 #import <Cocoa/Cocoa.h>
+#import <FinderSync/FinderSync.h>
 #import "MNNoteController.h"
 
 static CGFloat const MNPopoverWidth = 350.0;
@@ -73,6 +74,8 @@ static NSImage *MNMenuBarIcon(NSColor *strokeColor, BOOL template) {
     self.noteController.quitHandler = ^{ [NSApp terminate:nil]; };
     self.noteController.themeHandler = ^(NSString *theme) { [weakSelf applyTheme:theme]; };
     self.noteController.awakeHandler = ^(BOOL enabled) { [weakSelf setAwakeEnabled:enabled]; };
+    self.noteController.finderExtensionHandler = ^{ [FIFinderSyncController showExtensionManagementInterface]; };
+    [self.noteController setFinderExtensionEnabled:FIFinderSyncController.extensionEnabled];
     [self applyTheme:self.noteController.currentTheme];
 
     if (self.previewMode) {
@@ -83,6 +86,11 @@ static NSImage *MNMenuBarIcon(NSColor *strokeColor, BOOL template) {
     [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
     [self configureMenuBar];
     [self configurePopover];
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification {
+    (void)notification;
+    [self.noteController setFinderExtensionEnabled:FIFinderSyncController.extensionEnabled];
 }
 
 - (void)configureApplicationMenu {

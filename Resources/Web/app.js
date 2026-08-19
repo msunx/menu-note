@@ -5,6 +5,7 @@
     const saveStatus = document.querySelector('#save-status');
     const themeButton = document.querySelector('#theme-button');
     const awakeButton = document.querySelector('#awake-button');
+    const finderButton = document.querySelector('#finder-button');
     const linkPopover = document.querySelector('#link-popover');
     const linkInput = document.querySelector('#link-input');
     const linkConfirm = document.querySelector('#link-confirm');
@@ -32,6 +33,7 @@
     prepareTodoRows();
     setTheme(window.__MENU_NOTE_THEME__ === 'light' ? 'light' : 'dark', false);
     setAwakeEnabled(window.__MENU_NOTE_AWAKE__ === true);
+    setFinderExtensionEnabled(window.__MENU_NOTE_FINDER_ENABLED__ === true);
     document.execCommand('styleWithCSS', false, false);
     requestAnimationFrame(() => focusEditorStart());
 
@@ -57,6 +59,7 @@
         setAwakeEnabled(enabled);
         bridge?.menuNoteAwake?.postMessage(enabled);
     });
+    finderButton.addEventListener('click', () => bridge?.menuNoteFinder?.postMessage(true));
     document.querySelector('#quit-button').addEventListener('click', () => {
         flushSave();
         bridge?.menuNoteQuit?.postMessage(true);
@@ -416,7 +419,15 @@
         awakeButton.title = isEnabled ? '停止保持 Mac 唤醒' : '保持 Mac 唤醒（caffeinate）';
     }
 
+    function setFinderExtensionEnabled(enabled) {
+        const isEnabled = Boolean(enabled);
+        finderButton.setAttribute('aria-pressed', String(isEnabled));
+        finderButton.setAttribute('aria-label', isEnabled ? 'Finder 右键菜单已启用，点击管理' : '启用 Finder 右键菜单');
+        finderButton.title = isEnabled ? 'Finder 右键菜单已启用' : '启用 Finder 右键菜单';
+    }
+
     window.__MENU_NOTE_SET_AWAKE__ = setAwakeEnabled;
+    window.__MENU_NOTE_SET_FINDER_ENABLED__ = setFinderExtensionEnabled;
 
     function todoTextAtSelection() {
         const selection = window.getSelection();

@@ -12,6 +12,10 @@ EXPECTED_APP_PATH="$PROJECT_DIR/dist/Menu Note.app"
 CONTENTS_PATH="$APP_PATH/Contents"
 MACOS_PATH="$CONTENTS_PATH/MacOS"
 RESOURCES_PATH="$CONTENTS_PATH/Resources"
+PLUGINS_PATH="$CONTENTS_PATH/PlugIns"
+FINDER_EXTENSION_PATH="$PLUGINS_PATH/Menu Note Finder.appex"
+FINDER_EXTENSION_CONTENTS_PATH="$FINDER_EXTENSION_PATH/Contents"
+FINDER_EXTENSION_MACOS_PATH="$FINDER_EXTENSION_CONTENTS_PATH/MacOS"
 ICONSET_PATH="$BUILD_DIR/AppIcon.iconset"
 ICON_PATH="$RESOURCES_PATH/AppIcon.icns"
 ICON_GENERATOR="$BUILD_DIR/generate-icon"
@@ -28,7 +32,7 @@ if [[ ! -x /usr/bin/clang ]]; then
 fi
 
 /bin/rm -rf "$APP_PATH" "$ICONSET_PATH"
-/bin/mkdir -p "$MACOS_PATH" "$RESOURCES_PATH/Web" "$MODULE_CACHE" "$ICONSET_PATH"
+/bin/mkdir -p "$MACOS_PATH" "$RESOURCES_PATH/Web" "$MODULE_CACHE" "$ICONSET_PATH" "$FINDER_EXTENSION_MACOS_PATH"
 
 /usr/bin/clang \
     -fobjc-arc \
@@ -43,11 +47,31 @@ fi
     -I "$PROJECT_DIR/Sources/MenuNote" \
     "$PROJECT_DIR"/Sources/MenuNote/*.m \
     -framework Cocoa \
+    -framework FinderSync \
     -framework WebKit \
     -o "$MACOS_PATH/MenuNote"
 
 /bin/cp "$PROJECT_DIR/Resources/Info.plist" "$CONTENTS_PATH/Info.plist"
 /bin/cp "$PROJECT_DIR"/Resources/Web/* "$RESOURCES_PATH/Web/"
+
+/usr/bin/clang \
+    -fobjc-arc \
+    -fmodules \
+    -fmodules-cache-path="$MODULE_CACHE" \
+    -fapplication-extension \
+    -arch "$TARGET_ARCH" \
+    -mmacosx-version-min=14.0 \
+    -Os \
+    -DNDEBUG \
+    -Wall \
+    -Wextra \
+    -Wl,-e,_NSExtensionMain \
+    "$PROJECT_DIR"/Sources/MenuNoteFinder/*.m \
+    -framework Cocoa \
+    -framework FinderSync \
+    -o "$FINDER_EXTENSION_MACOS_PATH/MenuNoteFinder"
+
+/bin/cp "$PROJECT_DIR/Resources/FinderSync-Info.plist" "$FINDER_EXTENSION_CONTENTS_PATH/Info.plist"
 
 /usr/bin/clang \
     -fobjc-arc \
@@ -61,9 +85,9 @@ fi
 
 "$ICON_GENERATOR" "$ICONSET_PATH" "$ICON_PATH"
 
-/usr/bin/codesign --force --deep --sign - "$APP_PATH"
+/usr/bin/codesign --force --sign - --entitlements "$PROJECT_DIR/Resources/FinderSync.entitlements" "$FINDER_EXTENSION_PATH"
+/usr/bin/codesign --force --sign - "$APP_PATH"
 /usr/bin/codesign --verify --deep --strict "$APP_PATH"
 
 print "已生成：$APP_PATH"
 print "运行：open '$APP_PATH'"
-

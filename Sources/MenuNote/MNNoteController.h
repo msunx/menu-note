@@ -7,10 +7,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, nullable) void (^quitHandler)(void);
 @property(nonatomic, copy, nullable) void (^themeHandler)(NSString *theme);
 @property(nonatomic, copy, nullable) void (^awakeHandler)(BOOL enabled);
+@property(nonatomic, copy, nullable) void (^finderExtensionHandler)(void);
 @property(nonatomic, copy, readonly) NSString *currentTheme;
 
 - (instancetype)initWithPreviewContent:(BOOL)previewContent;
 - (void)setAwakeEnabled:(BOOL)enabled;
+- (void)setFinderExtensionEnabled:(BOOL)enabled;
 
 @end
 
