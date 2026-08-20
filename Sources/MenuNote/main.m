@@ -2,8 +2,8 @@
 #import <FinderSync/FinderSync.h>
 #import "MNNoteController.h"
 
-static CGFloat const MNPopoverWidth = 350.0;
-static CGFloat const MNPopoverHeight = 440.0;
+static CGFloat const MNPopoverWidth = 380.0;
+static CGFloat const MNPopoverHeight = 480.0;
 
 static NSImage *MNMenuBarIcon(NSColor *strokeColor, BOOL template) {
     NSImage *image = [NSImage imageWithSize:NSMakeSize(18, 18) flipped:NO drawingHandler:^BOOL(NSRect destinationRect) {

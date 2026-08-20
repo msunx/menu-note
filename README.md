@@ -25,7 +25,7 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 
 当前 Release 提供 Apple Silicon（`arm64`）版本，要求 macOS 14 或更高版本。
 
-1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.11.0-macos-arm64.zip`。
+1. 从 [Releases](https://github.com/msunx/menu-note/releases/latest) 下载 `Menu-Note-v0.12.0-macos-arm64.zip`。
 2. 解压后将 `Menu Note.app` 移动到“应用程序”目录。
 3. 首次启动时右键应用并选择“打开”。当前版本使用临时签名，尚未经过 Apple 公证。
 4. 点击菜单栏中的便笺图标开始记录。
@@ -51,6 +51,15 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 - 菜单使用 macOS 原生 SF Symbols，为剪切、复制目录、彻底删除和粘贴并移动提供对应图标，并自动适配系统外观。
 
 > “彻底删除”不可撤销。使用前请确认所选项目无需保留。
+
+### v0.12.0 更新
+
+- 以 Apple Design 原则重构编辑器界面，窗口扩大至 `380 × 480`，提升内容空间和文字可读性。
+- 将多层彩色玻璃收敛为单层 macOS 浮动材质，顶部状态与操作常驻显示，底部格式工具栏按文字、插入和列表重新分组。
+- 重新设计外观、保持唤醒、Finder 和退出图标，统一为接近 SF Symbols 的几何、线宽与视觉尺寸，并单独区分退出操作。
+- 链接和颜色面板改为源点明确、可中断的轻量过渡，同时补充 `aria-expanded` 状态与 Escape 键关闭支持。
+- 保存状态改为静态颜色与文字反馈，移除高频脉冲和持续蒸汽动画，让常用操作保持安静、即时。
+- 完善减少动态效果、减少透明度、高对比度和精细指针适配。
 
 ### v0.11.0 更新
 

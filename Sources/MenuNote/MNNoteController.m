@@ -78,7 +78,7 @@ static NSString *MNInlineRichHTML(NSString *value) {
     [contentController addUserScript:userScript];
     configuration.userContentController = contentController;
 
-    self.webView = [[WKWebView alloc] initWithFrame:NSMakeRect(0, 0, 350, 440) configuration:configuration];
+    self.webView = [[WKWebView alloc] initWithFrame:NSMakeRect(0, 0, 380, 480) configuration:configuration];
     self.webView.navigationDelegate = self;
     self.webView.allowsMagnification = NO;
     self.webView.underPageBackgroundColor = NSColor.clearColor;
@@ -87,7 +87,7 @@ static NSString *MNInlineRichHTML(NSString *value) {
     self.webView.layer.opaque = NO;
     self.webView.translatesAutoresizingMaskIntoConstraints = NO;
 
-    NSVisualEffectView *glassView = [[NSVisualEffectView alloc] initWithFrame:NSMakeRect(0, 0, 350, 440)];
+    NSVisualEffectView *glassView = [[NSVisualEffectView alloc] initWithFrame:NSMakeRect(0, 0, 380, 480)];
     glassView.material = NSVisualEffectMaterialUnderWindowBackground;
     glassView.blendingMode = NSVisualEffectBlendingModeBehindWindow;
     glassView.state = NSVisualEffectStateActive;
@@ -102,7 +102,7 @@ static NSString *MNInlineRichHTML(NSString *value) {
     ]];
 
     self.view = glassView;
-    self.preferredContentSize = NSMakeSize(350, 440);
+    self.preferredContentSize = NSMakeSize(380, 480);
 
     NSURL *webDirectory = [NSBundle.mainBundle.resourceURL URLByAppendingPathComponent:@"Web" isDirectory:YES];
     NSURL *indexURL = [webDirectory URLByAppendingPathComponent:@"index.html"];

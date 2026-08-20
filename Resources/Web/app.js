@@ -3,6 +3,7 @@
     const initial = window.__MENU_NOTE_INITIAL__ || { html: '' };
     const editor = document.querySelector('#editor');
     const saveStatus = document.querySelector('#save-status');
+    const saveStatusText = document.querySelector('#save-status-text');
     const themeButton = document.querySelector('#theme-button');
     const awakeButton = document.querySelector('#awake-button');
     const finderButton = document.querySelector('#finder-button');
@@ -10,8 +11,10 @@
     const linkInput = document.querySelector('#link-input');
     const linkConfirm = document.querySelector('#link-confirm');
     const colorPopover = document.querySelector('#color-popover');
+    const linkCommandButton = document.querySelector('[data-command="link"]');
     const colorCommandButton = document.querySelector('[data-command="color"]');
     const colorButtons = Array.from(colorPopover.querySelectorAll('[data-color]'));
+    const popoverCloseTimers = new WeakMap();
     let saveTimer = null;
     let savedSelection = null;
     let savedColorSelection = null;
@@ -80,8 +83,15 @@
         button.addEventListener('click', () => applyTextColor(button.dataset.color));
     });
     document.addEventListener('mousedown', (event) => {
-        if (!event.target.closest('#link-popover') && !event.target.closest('[data-command="link"]')) linkPopover.hidden = true;
-        if (!event.target.closest('#color-popover') && !event.target.closest('[data-command="color"]')) colorPopover.hidden = true;
+        if (!event.target.closest('#link-popover') && !event.target.closest('[data-command="link"]')) closeFloatingPopover(linkPopover, linkCommandButton);
+        if (!event.target.closest('#color-popover') && !event.target.closest('[data-command="color"]')) closeFloatingPopover(colorPopover, colorCommandButton);
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape' || colorPopover.hidden) return;
+        event.preventDefault();
+        closeFloatingPopover(colorPopover, colorCommandButton);
+        savedColorSelection = null;
+        editor.focus();
     });
 
     function runCommand(command) {
@@ -271,10 +281,10 @@
             return;
         }
         savedSelection = selection.getRangeAt(0).cloneRange();
-        colorPopover.hidden = true;
+        closeFloatingPopover(colorPopover, colorCommandButton, true);
         savedColorSelection = null;
         linkInput.value = '';
-        linkPopover.hidden = false;
+        openFloatingPopover(linkPopover, linkCommandButton);
         requestAnimationFrame(() => linkInput.focus());
     }
 
@@ -306,7 +316,7 @@
     }
 
     function closeLinkPopover() {
-        linkPopover.hidden = true;
+        closeFloatingPopover(linkPopover, linkCommandButton);
         savedSelection = null;
         editor.focus();
     }
@@ -318,9 +328,9 @@
             return;
         }
         savedColorSelection = selection.getRangeAt(0).cloneRange();
-        linkPopover.hidden = true;
+        closeFloatingPopover(linkPopover, linkCommandButton, true);
         savedSelection = null;
-        colorPopover.hidden = false;
+        openFloatingPopover(colorPopover, colorCommandButton);
         updateColorButtons(activeTextColor(selection.anchorNode));
     }
 
@@ -333,7 +343,7 @@
         document.execCommand('foreColor', false, colorMarkers[colorName]);
         document.execCommand('styleWithCSS', false, false);
         normalizeColorSpans();
-        colorPopover.hidden = true;
+        closeFloatingPopover(colorPopover, colorCommandButton);
         savedColorSelection = null;
         editor.focus();
         contentChanged();
@@ -393,7 +403,7 @@
     }
 
     function scheduleSave() {
-        saveStatus.innerHTML = '<i></i>正在保存';
+        saveStatusText.textContent = '保存中';
         saveStatus.classList.add('saving');
         window.clearTimeout(saveTimer);
         saveTimer = window.setTimeout(flushSave, 180);
@@ -402,14 +412,40 @@
     function flushSave() {
         window.clearTimeout(saveTimer);
         bridge?.menuNoteSave?.postMessage({ html: editor.innerHTML });
-        saveStatus.innerHTML = '<i></i>已保存';
+        saveStatusText.textContent = '已保存';
         saveStatus.classList.remove('saving');
     }
 
     function setTheme(theme, notifyHost) {
         document.documentElement.dataset.theme = theme;
         themeButton.setAttribute('aria-label', theme === 'dark' ? '切换为浅色模式' : '切换为深色模式');
+        themeButton.title = theme === 'dark' ? '切换为浅色模式' : '切换为深色模式';
         if (notifyHost) bridge?.menuNoteTheme?.postMessage(theme);
+    }
+
+    function openFloatingPopover(popover, trigger) {
+        window.clearTimeout(popoverCloseTimers.get(popover));
+        popover.hidden = false;
+        popover.dataset.open = 'false';
+        trigger.setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(() => {
+            if (!popover.hidden) popover.dataset.open = 'true';
+        });
+    }
+
+    function closeFloatingPopover(popover, trigger, immediate = false) {
+        trigger.setAttribute('aria-expanded', 'false');
+        if (popover.hidden) return;
+        window.clearTimeout(popoverCloseTimers.get(popover));
+        popover.dataset.open = 'false';
+        if (immediate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            popover.hidden = true;
+            return;
+        }
+        const timer = window.setTimeout(() => {
+            if (popover.dataset.open !== 'true') popover.hidden = true;
+        }, 170);
+        popoverCloseTimers.set(popover, timer);
     }
 
     function setAwakeEnabled(enabled) {
