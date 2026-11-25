@@ -30,6 +30,7 @@
     --color-orange: var(--color-peach);
     --color-purple: var(--color-mauve);
     --todo-text: var(--text);
+    --todo-progress: #f7c27a;
     --tint-blue: rgba(100, 210, 255, .12);
     --tint-lilac: rgba(198, 160, 246, .1);
     --glass-highlight: rgba(255, 255, 255, .16);
@@ -70,6 +71,7 @@
     --color-orange: var(--color-peach);
     --color-purple: var(--color-mauve);
     --todo-text: var(--text);
+    --todo-progress: #945012;
     --tint-blue: rgba(0, 122, 255, .1);
     --tint-lilac: rgba(126, 87, 194, .07);
     --glass-highlight: rgba(255, 255, 255, .88);
@@ -445,10 +447,43 @@ button {
     content: "";
 }
 
+.todo-row[data-checked="mixed"] .todo-check {
+    border-color: var(--todo-progress);
+    background: color-mix(in srgb, var(--todo-progress) 16%, transparent);
+}
+
+.todo-row[data-checked="mixed"] .todo-check::after {
+    position: absolute;
+    inset: 50% auto auto 50%;
+    width: 7px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--todo-progress);
+    transform: translate(-50%, -50%);
+    content: "";
+}
+
+.todo-row[data-checked="mixed"]::after {
+    margin-top: 2px;
+    padding: 0 7px;
+    flex: 0 0 auto;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--todo-progress) 12%, transparent);
+    color: var(--todo-progress);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    pointer-events: none;
+    user-select: none;
+    content: "进行中";
+    content: "进行中" / "";
+}
+
 .todo-text {
     min-width: 0;
     flex: 1;
     outline: 0;
+    overflow-wrap: anywhere;
 }
 
 .todo-text:not([class*="text-color-"]) {

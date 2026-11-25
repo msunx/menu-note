@@ -88,6 +88,7 @@ Menu Note 是一款常驻 macOS 菜单栏的轻量富文本临时记事本。点
 | 粗体 | `Command + B` |
 | 斜体 | `Command + I` |
 | 添加链接 | `Command + K` |
+| 切换待办的进行中状态 | `Shift + 点击待办`，或聚焦复选框后按 `Shift + 空格` |
 | 撤销 / 重做 | `Command + Z` / `Command + Shift + Z` |
 | 退出应用 | `Command + Q` |
 

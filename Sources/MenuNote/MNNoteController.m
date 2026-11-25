@@ -114,7 +114,7 @@ static NSString *MNInlineRichHTML(NSString *value) {
         return @"<div><strong class=\"text-color-blue\">今天</strong> · <span class=\"text-color-mauve\">把重要的事写下来</span></div><div><br></div>"
             "<div class=\"todo-row\" data-checked=\"true\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button><span class=\"todo-text\">完成菜单栏编辑器</span></div>"
             "<div class=\"todo-row\" data-checked=\"true\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button><span class=\"todo-text\">打磨交互细节</span></div>"
-            "<div class=\"todo-row\" data-checked=\"false\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button>"
+            "<div class=\"todo-row\" data-checked=\"mixed\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button>"
             "<span class=\"todo-text text-color-green\">录制演示</span></div>"
             "<div class=\"todo-row\" data-checked=\"false\"><button class=\"todo-check\" type=\"button\" contenteditable=\"false\"></button>"
             "<span class=\"todo-text text-color-peach\">发布 ✨</span></div>";

@@ -53,6 +53,9 @@
     });
     editor.addEventListener('keydown', handleEditorKeyDown);
     editor.addEventListener('paste', handlePaste);
+    editor.addEventListener('mousedown', (event) => {
+        if (event.shiftKey && event.button === 0 && event.target.closest('.todo-row')) event.preventDefault();
+    });
     editor.addEventListener('click', handleEditorClick);
     document.addEventListener('selectionchange', updateToolbarState);
 
@@ -129,6 +132,15 @@
             return;
         }
 
+        const checkboxRow = event.target.closest('.todo-check')?.closest('.todo-row');
+        if (checkboxRow) {
+            if (event.shiftKey && (event.key === ' ' || event.key === 'Enter')) {
+                event.preventDefault();
+                if (!event.repeat) toggleTodo(checkboxRow, true);
+            }
+            return;
+        }
+
         const todoText = todoTextAtSelection();
         if (!todoText) return;
         if (event.key === 'Enter' && !event.shiftKey && !event.metaKey && !event.altKey && !event.ctrlKey) {
@@ -147,18 +159,23 @@
     }
 
     function handleEditorClick(event) {
-        const checkbox = event.target.closest('.todo-check');
-        if (checkbox) {
+        const row = event.target.closest('.todo-row');
+        if (row && (event.shiftKey || event.target.closest('.todo-check'))) {
             event.preventDefault();
-            const row = checkbox.closest('.todo-row');
-            const checked = row.dataset.checked !== 'true';
-            row.dataset.checked = String(checked);
-            checkbox.setAttribute('aria-checked', String(checked));
-            checkbox.setAttribute('aria-label', checked ? '标记为未完成' : '标记为已完成');
-            contentChanged();
+            toggleTodo(row, event.shiftKey);
             return;
         }
         if (event.target.closest('a')) event.preventDefault();
+    }
+
+    function toggleTodo(row, toggleProgress) {
+        const checked = row.dataset.checked;
+        if (toggleProgress) {
+            row.dataset.checked = checked === 'mixed' ? 'false' : 'mixed';
+        } else {
+            row.dataset.checked = String(checked !== 'true');
+        }
+        contentChanged();
     }
 
     function insertTodo() {
@@ -232,13 +249,17 @@
 
     function prepareTodoRows() {
         editor.querySelectorAll('.todo-row').forEach((row) => {
-            row.dataset.checked = String(row.dataset.checked === 'true');
+            const checked = ['true', 'mixed'].includes(row.dataset.checked) ? row.dataset.checked : 'false';
+            row.dataset.checked = checked;
             const check = row.querySelector('.todo-check');
             if (check) {
+                const label = checked === 'mixed' ? '进行中，标记为已完成' : checked === 'true' ? '标记为未完成' : '标记为已完成';
                 check.contentEditable = 'false';
                 check.setAttribute('role', 'checkbox');
-                check.setAttribute('aria-checked', row.dataset.checked);
-                check.setAttribute('aria-label', row.dataset.checked === 'true' ? '标记为未完成' : '标记为已完成');
+                check.setAttribute('aria-checked', checked);
+                check.setAttribute('aria-label', label);
+                check.setAttribute('aria-keyshortcuts', 'Shift+Space Shift+Enter');
+                check.title = `${label}（${checked === 'mixed' ? '⇧ 点击取消进行中' : '⇧ 点击标记为进行中'}）`;
             }
             const text = row.querySelector('.todo-text');
             if (text) ensureEditableContent(text);
